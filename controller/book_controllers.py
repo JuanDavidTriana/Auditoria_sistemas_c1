@@ -19,3 +19,12 @@ async def create_book(book: BookCreate, db: Any= Depends(get_db)):
     data = book.model_dump() # Convert Pydantic model to dict
     book_id = await repo.create(data)
     return {"id": book_id, **data}
+
+@router.get("/{book_id}", response_model=BookOut)
+async def get_book(book_id: str, db: Any= Depends(get_db)):
+    #await require_admin(user)
+    repo = BookRepository(db)
+    book = await repo.find_by_id(book_id)
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Libro no encontrado")
+    return book
